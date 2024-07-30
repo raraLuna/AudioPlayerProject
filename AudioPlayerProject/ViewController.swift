@@ -17,7 +17,7 @@ class ViewController: UIViewController {
     
     lazy var audioEngine = AVAudioEngine()
     let playerNode = AVAudioPlayerNode()
-    var byteBuffers: [[UInt8]] = []
+    var audioByteArrays: [[UInt8]] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,58 +59,29 @@ class ViewController: UIViewController {
                 print("AVAudioPlayer Error: \(error.localizedDescription)")
             }
         }
-//        let audioPlayer = AVAudioPlayer()
-//        guard !audioPlayer.isPlaying else {
-//            print("Audio Plyer is playing")
-//            return
-//        }
-//        if let audioURL = Bundle.main.url(forResource: "gs-16b-1c-44100hz_[cut_2sec]", withExtension: "wav") {
-//            do {
-//                let audioPlayer = try AVAudioPlayer(contentsOf: audioURL)
-//                audioPlayer.play()
-//                print("Audio play start")
-//                DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-//                    audioPlayer.stop()9
-//                    print("Audio play stop")
-//                }
-//            } catch {
-//                print("AVAudioPlayer Error: \(error.localizedDescription)")
-//            }
-//        }
     }
 
     func sampleAudioFileToByteWithFormat() {
         if let url = Bundle.main.url(forResource: "gs-16b-1c-44100hz_[cut_2sec]", withExtension: "wav") {
-            let sampleRate = 44100.0
+            let sampleRate = 48000.0
             let channels: AVAudioChannelCount = 1
             let bitsPerChannel: UInt32 = 16
             let bufferSize: AVAudioFrameCount = 1024
             
-            if let byteArrays = readAudioFileToBytesCustomFormat(fileURL: url, sampleRate: sampleRate, channels: channels, bitsPerChannel: bitsPerChannel, bufferSize: bufferSize) {
-                for (index, byteArray) in byteArrays.enumerated() {
-                    print("byteArray [\(index)] : \(byteArray.count) bytes")
-                }
-            } else {
-                print("Failed to read audio file")
-            }
+            self.readAudioFileToBytesCustomFormat(fileURL: url, sampleRate: sampleRate, channels: channels, bitsPerChannel: bitsPerChannel, bufferSize: bufferSize)
         }
     }
 
     func sampleAudioByteArrayToAudioPlayer() {
         if let url = Bundle.main.url(forResource: "gs-16b-1c-44100hz_[cut_2sec]", withExtension: "wav") {
-            let sampleRate = 44100.0
+            let sampleRate = 48000.0
             let channels: AVAudioChannelCount = 1
             let bitsPerChannel: UInt32 = 16
             let bufferSize: AVAudioFrameCount = 1024
             
-            if let byteArrays = readAudioFileToBytesCustomFormat(fileURL: url, sampleRate: sampleRate, channels: channels, bitsPerChannel: bitsPerChannel, bufferSize: bufferSize) {
-                for (index, byteArray) in byteArrays.enumerated() {
-                    print("byteArray [\(index)] : \(byteArray.count) bytes")
-                }
-                playByteArrayToAudio(byteArrays: byteArrays, sampleRate: sampleRate, channels: channels)
-            } else {
-                print("Failed to read audio file")
-            }
+            let byteArrays = self.audioByteArrays
+            
+            self.playByteArrayToAudio(byteArrays: byteArrays, sampleRate: sampleRate, channels: channels)
         }
     }
 
@@ -152,7 +123,7 @@ class ViewController: UIViewController {
         }
     }
 
-    func readAudioFileToBytesCustomFormat(fileURL: URL, sampleRate: Double, channels: AVAudioChannelCount, bitsPerChannel: UInt32, bufferSize: AVAudioFrameCount) -> [[UInt8]]? {
+    func readAudioFileToBytesCustomFormat(fileURL: URL, sampleRate: Double, channels: AVAudioChannelCount, bitsPerChannel: UInt32, bufferSize: AVAudioFrameCount) {
         do {
             // Load the audio file
             let audioFile = try AVAudioFile(forReading: fileURL)
@@ -162,7 +133,7 @@ class ViewController: UIViewController {
             // AVAudioCommonFormat.pcmFormatInt32 = A format that represent signed 32-bit native-endian integers.
             guard let format = AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: Double(sampleRate), channels: AVAudioChannelCount(channels), interleaved: false) else {
                 print("Failed to create AVAudioformat")
-                return nil
+                return
             }
             print("Create format: \(String(describing: format))")
             
@@ -176,7 +147,7 @@ class ViewController: UIViewController {
                 // Make buffer object with format and size
                 guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: bufferSize) else {
                     print("Failed to create AVAudioPCMBuffer")
-                    return nil
+                    return
                 }
                 print("Buffer object: \(buffer)")
                 
@@ -195,7 +166,7 @@ class ViewController: UIViewController {
                 // * pointer : the variable what reference memory's address values saved data
                 guard let channelData = buffer.int16ChannelData else {
                     print("Failed to access channel data")
-                    return nil
+                    return
                 }
                 print("ChannelData(memory pointer of audio): \(channelData)")
                 
@@ -250,15 +221,22 @@ class ViewController: UIViewController {
                 byteBuffers.append(byteArray)
             }
             
-            return byteBuffers
+            for (index, byteArray) in byteBuffers.enumerated() {
+                print("byteArray [\(index)] : \(byteArray.count) bytes")
+            }
+            
+            self.audioByteArrays = byteBuffers
             
         } catch {
             print("Error reading audio file: \(error.localizedDescription)")
-            return nil
+            return
         }
     }
 
     func playByteArrayToAudio(byteArrays:[[UInt8]], sampleRate: Double, channels: AVAudioChannelCount) {
+//        var byteArrays : [[UInt8]] = []
+//        byteArrays = self.audioByteArrays
+        
         let bus: AVAudioNodeBus = 0
         // Create AudioEngine and AudioPlayerNode.
         // AVAudioEngine: An object that manages a graph of audio nodes, controls playback, and configures real-time rendering constraints.

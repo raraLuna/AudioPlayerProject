@@ -34,9 +34,9 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NH8-vB-xyA">
-                                <rect key="frame" x="57.666666666666657" y="339" width="278" height="35"/>
+                                <rect key="frame" x="65.666666666666686" y="339" width="261.99999999999994" height="35"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="Audio File -&gt; Byte Array -&gt; Buffer"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Byte Array -&gt; AudioPlayerNode"/>
                                 <connections>
                                     <action selector="clickedByteArrayPlayAudioButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KzV-QB-s6y"/>
                                 </connections>
