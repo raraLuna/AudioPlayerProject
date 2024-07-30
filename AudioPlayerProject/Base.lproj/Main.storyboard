@@ -1,24 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="AudioPlayerProject" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" xcode11CocoaTouchSystemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="g4e-2d-OWQ">
+                                <rect key="frame" x="144.66666666666666" y="209" width="104" height="35"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Play Audio"/>
+                                <connections>
+                                    <action selector="clickedPlayAudioButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="L1E-cg-C5R"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RN8-qu-OEK">
+                                <rect key="frame" x="94" y="274" width="205" height="35"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Audio File -&gt; Byte Array"/>
+                                <connections>
+                                    <action selector="clickedFileToByteArrayButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="qri-2J-u4a"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NH8-vB-xyA">
+                                <rect key="frame" x="57.666666666666657" y="339" width="278" height="35"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Audio File -&gt; Byte Array -&gt; Buffer"/>
+                                <connections>
+                                    <action selector="clickedByteArrayPlayAudioButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KzV-QB-s6y"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OaX-cc-cyy">
+                                <rect key="frame" x="118" y="404" width="157" height="35"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="AudioNode.play()"/>
+                                <connections>
+                                    <action selector="clickedAudioNodePlayButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="4I6-21-bTO"/>
+                                </connections>
+                            </button>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="OaX-cc-cyy" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="0S7-WM-NTX"/>
+                            <constraint firstItem="NH8-vB-xyA" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="4H0-b1-0Ml"/>
+                            <constraint firstItem="RN8-qu-OEK" firstAttribute="top" secondItem="g4e-2d-OWQ" secondAttribute="bottom" constant="30" id="6KB-jr-yle"/>
+                            <constraint firstItem="OaX-cc-cyy" firstAttribute="top" secondItem="NH8-vB-xyA" secondAttribute="bottom" constant="30" id="BD5-D6-yq1"/>
+                            <constraint firstItem="NH8-vB-xyA" firstAttribute="top" secondItem="RN8-qu-OEK" secondAttribute="bottom" constant="30" id="QLy-jU-6Bv"/>
+                            <constraint firstItem="g4e-2d-OWQ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="150" id="ebe-bH-ITY"/>
+                            <constraint firstItem="RN8-qu-OEK" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="miQ-nk-zXW"/>
+                            <constraint firstItem="g4e-2d-OWQ" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="xRV-PK-p4P"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="audioFileToByteArrayBtn" destination="RN8-qu-OEK" id="wAI-ht-iFn"/>
+                        <outlet property="audioNodePlayBtn" destination="OaX-cc-cyy" id="iSa-3j-hb4"/>
+                        <outlet property="byteArrayToPlayAudioBtn" destination="NH8-vB-xyA" id="ufA-bb-wm4"/>
+                        <outlet property="justPlayAudioBtn" destination="g4e-2d-OWQ" id="Ayu-Tt-OQt"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="-59" y="-27"/>
         </scene>
     </scenes>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
 </document>
