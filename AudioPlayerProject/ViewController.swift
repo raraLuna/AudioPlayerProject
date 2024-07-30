@@ -16,7 +16,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var audioNodePlayBtn: UIButton!
     
     lazy var audioEngine = AVAudioEngine()
-    let playerNode = AVAudioPlayerNode()
+    var playerNode = AVAudioPlayerNode()
     var audioByteArrays: [[UInt8]] = []
     
     override func viewDidLoad() {
@@ -47,9 +47,10 @@ class ViewController: UIViewController {
         if let audioURL = Bundle.main.url(forResource: "gs-16b-1c-44100hz_[cut_2sec]", withExtension: "wav") {
             do {
                 let file: AVAudioFile = try AVAudioFile(forReading: audioURL)
+                print("audio play file: \(file)")
                 
                 self.audioEngine.attach(self.playerNode)
-                
+                print("audio engine attached nodes: \(self.audioEngine.attachedNodes)")
 //                guard let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(sampleRate), channels: AVAudioChannelCount(channels), interleaved: false) else {
 //                    print("Failed to create AVAudioformat")
 //                    return
@@ -57,12 +58,13 @@ class ViewController: UIViewController {
 //                print("Create format: \(String(describing: format))")
                 //self.audioEngine.connect(self.playerNode, to: self.audioEngine.outputNode, format: format)
                 
-                self.audioEngine.connect(self.playerNode, to: self.audioEngine.mainMixerNode, format: file.processingFormat)
+                self.audioEngine.connect(self.playerNode, to: self.audioEngine.outputNode, format: file.processingFormat)
                 print("Audio File processing format: \(file.processingFormat)")
                 
                 try self.audioEngine.start()
                 
                 self.playerNode.scheduleFile(file, at: nil, completionHandler: nil)
+
                 
                 self.playAudioNodePlay()
                 
@@ -349,7 +351,7 @@ class ViewController: UIViewController {
                 }
                 
                 // Schedules the playing samples from an audio buffer at the time and playback options you specify.
-                playerNode.scheduleBuffer(buffer, at: nil, options: .loops, completionHandler: nil)
+                playerNode.scheduleBuffer(buffer, at: nil, options: .interrupts, completionHandler: nil)
                 print("Player Node scheduleBuffer prepared")
                 //print("Player Node mainMixer format: \(audioEngine.mainMixerNode.outputFormat(forBus: bus))")
                 print("Player Node output format: \(playerNode.outputFormat(forBus: bus))")
