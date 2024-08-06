@@ -26,40 +26,50 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RN8-qu-OEK">
-                                <rect key="frame" x="94" y="274" width="205" height="35"/>
+                                <rect key="frame" x="67.666666666666686" y="304" width="258" height="35"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="Audio File -&gt; Byte Array"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Audio File -&gt; Byte Array (PCM)"/>
                                 <connections>
                                     <action selector="clickedFileToByteArrayButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="qri-2J-u4a"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NH8-vB-xyA">
-                                <rect key="frame" x="65.666666666666686" y="339" width="261.99999999999994" height="35"/>
+                                <rect key="frame" x="59.666666666666657" y="369" width="274" height="35"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="Byte Array -&gt; AudioPlayerNode"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Byte Array -&gt; AudioPlayer (PCM)"/>
                                 <connections>
                                     <action selector="clickedByteArrayPlayAudioButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="KzV-QB-s6y"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OaX-cc-cyy">
-                                <rect key="frame" x="118" y="404" width="157" height="35"/>
+                                <rect key="frame" x="118" y="434" width="157" height="35"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="AudioNode.play()"/>
                                 <connections>
                                     <action selector="clickedAudioNodePlayButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="4I6-21-bTO"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="G3K-sh-FAH">
+                                <rect key="frame" x="139" y="529" width="115.33333333333331" height="35"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Make Dump"/>
+                                <connections>
+                                    <action selector="clickedToMakeByteArray:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wHE-DQ-nTZ"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="OaX-cc-cyy" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="0S7-WM-NTX"/>
                             <constraint firstItem="NH8-vB-xyA" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="4H0-b1-0Ml"/>
-                            <constraint firstItem="RN8-qu-OEK" firstAttribute="top" secondItem="g4e-2d-OWQ" secondAttribute="bottom" constant="30" id="6KB-jr-yle"/>
-                            <constraint firstItem="OaX-cc-cyy" firstAttribute="top" secondItem="NH8-vB-xyA" secondAttribute="bottom" constant="30" id="BD5-D6-yq1"/>
-                            <constraint firstItem="NH8-vB-xyA" firstAttribute="top" secondItem="RN8-qu-OEK" secondAttribute="bottom" constant="30" id="QLy-jU-6Bv"/>
+                            <constraint firstItem="RN8-qu-OEK" firstAttribute="top" secondItem="g4e-2d-OWQ" secondAttribute="bottom" constant="60" id="6KB-jr-yle"/>
+                            <constraint firstItem="G3K-sh-FAH" firstAttribute="top" secondItem="OaX-cc-cyy" secondAttribute="bottom" constant="60" id="Ayn-SX-HLk"/>
+                            <constraint firstItem="G3K-sh-FAH" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="MZq-AO-T5M"/>
+                            <constraint firstItem="OaX-cc-cyy" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="P5Y-Po-ksA"/>
+                            <constraint firstItem="OaX-cc-cyy" firstAttribute="top" secondItem="NH8-vB-xyA" secondAttribute="bottom" constant="30" id="eWI-B8-Sfd"/>
                             <constraint firstItem="g4e-2d-OWQ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="150" id="ebe-bH-ITY"/>
                             <constraint firstItem="RN8-qu-OEK" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="miQ-nk-zXW"/>
+                            <constraint firstItem="NH8-vB-xyA" firstAttribute="top" secondItem="RN8-qu-OEK" secondAttribute="bottom" constant="30" id="v7b-k3-jhV"/>
                             <constraint firstItem="g4e-2d-OWQ" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="xRV-PK-p4P"/>
                         </constraints>
                     </view>
@@ -68,6 +78,7 @@
                         <outlet property="audioNodePlayBtn" destination="OaX-cc-cyy" id="iSa-3j-hb4"/>
                         <outlet property="byteArrayToPlayAudioBtn" destination="NH8-vB-xyA" id="ufA-bb-wm4"/>
                         <outlet property="justPlayAudioBtn" destination="g4e-2d-OWQ" id="Ayu-Tt-OQt"/>
+                        <outlet property="makeByteArrayBtn" destination="G3K-sh-FAH" id="glu-kJ-HRI"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

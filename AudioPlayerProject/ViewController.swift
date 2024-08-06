@@ -11,6 +11,7 @@ import AVFoundation
 class ViewController: UIViewController {
 
     @IBOutlet weak var justPlayAudioBtn: UIButton!
+    @IBOutlet weak var makeByteArrayBtn: UIButton!
     @IBOutlet weak var audioFileToByteArrayBtn: UIButton!
     @IBOutlet weak var byteArrayToPlayAudioBtn: UIButton!
     @IBOutlet weak var audioNodePlayBtn: UIButton!
@@ -40,6 +41,10 @@ class ViewController: UIViewController {
         self.playAudioNodePlay()
     }
     
+    @IBAction func clickedToMakeByteArray(_ sender: Any) {
+        self.readAudioFileToByteDump()
+    }
+    
     func sampleAudioJustPlay() {
         //let sampleRate = 48000.0
         //let channels: AVAudioChannelCount = 1
@@ -49,7 +54,7 @@ class ViewController: UIViewController {
         self.audioEngine = AVAudioEngine()
         self.playerNode = AVAudioPlayerNode()
         
-        if let audioURL = Bundle.main.url(forResource: "gs-16b-1c-44100hz_[cut_2sec]", withExtension: "wav") {
+        if let audioURL = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16", withExtension: "wav") {
             do {
                 let file: AVAudioFile = try AVAudioFile(forReading: audioURL)
                 print("audio play file: \(file)")
@@ -68,6 +73,7 @@ class ViewController: UIViewController {
                 self.audioEngine.connect(self.playerNode, to: self.audioEngine.outputNode, format: file.processingFormat)
                 print("Audio File processing format: \(file.processingFormat)")
                 print("AVAudio Player Node format: \(playerNode.outputFormat(forBus: bus))")
+                print("AVAudio Player Node format.streamDescription.pointee.mBytesPerFrame: \(playerNode.outputFormat(forBus: bus).streamDescription.pointee.mBytesPerFrame)")
                 try self.audioEngine.start()
                 
                 self.playerNode.scheduleFile(file, at: nil, completionHandler: nil)
@@ -82,18 +88,18 @@ class ViewController: UIViewController {
     }
 
     func sampleAudioFileToByteWithFormat() {
-        if let url = Bundle.main.url(forResource: "gs-16b-1c-44100hz_[cut_2sec]", withExtension: "wav") {
+        if let url = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16", withExtension: "wav") {
             let sampleRate = 48000.0
             let channels: AVAudioChannelCount = 1
             let bitsPerChannel: UInt32 = 16
             let bufferSize: AVAudioFrameCount = 1024
             
-            self.readAudioFileToBytesCustomFormat(fileURL: url, sampleRate: sampleRate, channels: channels, bitsPerChannel: bitsPerChannel, bufferSize: bufferSize)
+            self.readAudioFileToBytesPCMFormat(fileURL: url, sampleRate: sampleRate, channels: channels, bitsPerChannel: bitsPerChannel, bufferSize: bufferSize)
         }
     }
 
     func sampleAudioByteArrayToAudioPlayer() {
-        //if let url = Bundle.main.url(forResource: "gs-16b-1c-44100hz_[cut_2sec]", withExtension: "wav") {
+        //if let url = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16", withExtension: "wav") {
             let sampleRate = 48000.0
             let channels: AVAudioChannelCount = 1
             //let bitsPerChannel: UInt32 = 16
@@ -101,11 +107,19 @@ class ViewController: UIViewController {
             
             let byteArrays = self.audioByteArrays
             
-            self.playByteArrayToAudio(byteArrays: byteArrays, sampleRate: sampleRate, channels: channels)
+            self.playByteArrayToAudioPCM(byteArrays: byteArrays, sampleRate: sampleRate, channels: channels)
         //}
     }
 
-    func readAudioFileToBytesAll(fileURL: URL) ->[UInt8]? {
+    //func readAudioFileToBytesAll() ->[UInt8]? {
+    func readAudioFileToByteDump() {
+        print("start make byte array")
+        let bus: AVAudioNodeBus = 0
+        guard let fileURL = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16", withExtension: "wav") else {
+            print("Failed to load audioFile.")
+            return
+        }
+        
         do {
             // Load the audio file
             let audioFile = try AVAudioFile(forReading: fileURL)
@@ -116,7 +130,7 @@ class ViewController: UIViewController {
             print("frameCount: \(frameCount)")
             guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount) else {
                 print("Failed to create AVAudioPCMBuffer")
-                return nil
+                return
             }
             
             try audioFile.read(into: buffer)
@@ -124,7 +138,7 @@ class ViewController: UIViewController {
             // Convert the buffer to bytes
             guard let channelData = buffer.floatChannelData else {
                 print("Failed to access channel data")
-                return nil
+                return
             }
             
             let channelDataPointer = channelData.pointee
@@ -135,15 +149,51 @@ class ViewController: UIViewController {
             data.copyBytes(to: &byteArray, count: channelDataSize)
             
             print("byteArray: \(byteArray)")
-            return byteArray
+            print("Making byte Array finished")
+
+            // play dump file with PCM Buffer
+            self.audioEngine = AVAudioEngine()
+            self.playerNode = AVAudioPlayerNode()
             
+            self.audioEngine.attach(self.playerNode)
+            self.audioEngine.connect(self.playerNode, to: self.audioEngine.outputNode, format: format)
+            
+            try self.audioEngine.start()
+            
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+            
+            guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(byteArray.count) / (format.streamDescription.pointee.mBytesPerFrame)) else {
+                print("Failed to create AVAudioPCMBuffer")
+                return
+            }
+            
+            buffer.frameLength = buffer.frameCapacity
+            let audioBuffer = buffer.audioBufferList.pointee.mBuffers
+            
+            guard let dst = audioBuffer.mData?.bindMemory(to: UInt8.self, capacity: byteArray.count) else {
+                print("Failed to bind memory to destination buffer")
+                return
+            }
+            byteArray.withUnsafeBufferPointer {
+                if let baseAddress = $0.baseAddress {
+                    dst.update(from: baseAddress, count: byteArray.count)
+                    print("Data successfully copied to buffer.")
+                } else {
+                    print("Failed to get base address of byte array")
+                }
+            }
+            self.playerNode.scheduleBuffer(buffer, completionHandler: nil)
+
+            self.playAudioNodePlay()
+            print("AVAudio Format: \(format)")
+            print("Audio play finished.")
         } catch {
-            print("Error reading audio file:\(error.localizedDescription)")
-            return nil
+            print("Error :\(error.localizedDescription)")
         }
     }
 
-    func readAudioFileToBytesCustomFormat(fileURL: URL, sampleRate: Double, channels: AVAudioChannelCount, bitsPerChannel: UInt32, bufferSize: AVAudioFrameCount) {
+    func readAudioFileToBytesPCMFormat(fileURL: URL, sampleRate: Double, channels: AVAudioChannelCount, bitsPerChannel: UInt32, bufferSize: AVAudioFrameCount) {
         do {
             // Load the audio file
             let audioFile = try AVAudioFile(forReading: fileURL)
@@ -172,7 +222,7 @@ class ViewController: UIViewController {
                 print("Buffer object: \(buffer)")
                 
                 try audioFile.read(into: buffer, frameCount: bufferSize)
-                
+                print("successed read audioFile info buffer as frameCount \(bufferSize)")
                 // Get channel data with .int32ChannelData
                 // What is Channel Data???
                 // Apple Document: The buffer's audio sample as floating point values.
@@ -241,7 +291,7 @@ class ViewController: UIViewController {
         }
     }
 
-    func playByteArrayToAudio(byteArrays:[[UInt8]], sampleRate: Double, channels: AVAudioChannelCount) {
+    func playByteArrayToAudioPCM(byteArrays:[[UInt8]], sampleRate: Double, channels: AVAudioChannelCount) {
 //        var byteArrays : [[UInt8]] = []
 //        byteArrays = self.audioByteArrays
         
@@ -263,6 +313,8 @@ class ViewController: UIViewController {
         print("AVAudio Player Node format: \(self.playerNode.outputFormat(forBus: bus))")
         
         // Creadt AudioFormat
+        // PCM : Pulse Code Modulation - 펄즈 부호 변조.
+        //      아날로그 신호의 디지털 표헌. 신호등급을 균일한 주기로 표본화 한 다음 디지털 코드로 양자화 처리함.
         guard let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: sampleRate, channels: channels, interleaved: false) else {
             print("Failed to create AVAudioformat")
             return
@@ -288,7 +340,8 @@ class ViewController: UIViewController {
                 //streamDescription: The audio format properties of a stream of audio data
                 //pointee: Accesses the instance referenced by this pointer.
                 //mBytesPerFrame: The number of bytes from the start of one frame to the start of the next frame in an audio buffer.
-
+                // frameCapacity: The capacity of the buffer in PCM sample frames.
+                print("frameCapacity AVAudioFrameCount(byteArray.count) : \(AVAudioFrameCount(byteArray.count))")
                 guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(byteArray.count) / (format.streamDescription.pointee.mBytesPerFrame)) else {
                     print("Failed to create AVAudioPCMBuffer")
                     return
@@ -297,6 +350,7 @@ class ViewController: UIViewController {
                 print("format.streamDescription.pointee.mBytesPerFrame: \(format.streamDescription.pointee.mBytesPerFrame)")
                 print("AVAudioPCMBuffer: \(buffer)")
                 
+                //** setFrameLength condition: frameLength <= frameCapacity
                 buffer.frameLength = buffer.frameCapacity
                 print("Buffer.frameLength = buffer.frameCapacity : \(buffer.frameLength)")
                 
