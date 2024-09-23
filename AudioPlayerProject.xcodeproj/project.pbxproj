@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AEAF508A2CA0D41D00666760 /* sampleAudio_2ch_44100_Float32.wav in Resources */ = {isa = PBXBuildFile; fileRef = AEAF50892CA0D41D00666760 /* sampleAudio_2ch_44100_Float32.wav */; };
 		AEC5F99B2C58500600D73179 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEC5F99A2C58500600D73179 /* AppDelegate.swift */; };
 		AEC5F99D2C58500600D73179 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEC5F99C2C58500600D73179 /* SceneDelegate.swift */; };
 		AEC5F99F2C58500600D73179 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEC5F99E2C58500600D73179 /* ViewController.swift */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AEAF50892CA0D41D00666760 /* sampleAudio_2ch_44100_Float32.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = sampleAudio_2ch_44100_Float32.wav; path = ../../../Sample/sampleAudio_2ch_44100_Float32.wav; sourceTree = "<group>"; };
 		AEC5F9972C58500600D73179 /* AudioPlayerProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioPlayerProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AEC5F99A2C58500600D73179 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AEC5F99C2C58500600D73179 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -74,6 +76,7 @@
 			isa = PBXGroup;
 			children = (
 				AEC5F9B32C604D2900D73179 /* sampleAudio_1ch_48000_Int16.wav */,
+				AEAF50892CA0D41D00666760 /* sampleAudio_2ch_44100_Float32.wav */,
 			);
 			path = Resource;
 			sourceTree = "<group>";
@@ -136,6 +139,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AEAF508A2CA0D41D00666760 /* sampleAudio_2ch_44100_Float32.wav in Resources */,
 				AEC5F9B42C604D2900D73179 /* sampleAudio_1ch_48000_Int16.wav in Resources */,
 				AEC5F9A42C58500800D73179 /* Assets.xcassets in Resources */,
 				AEC5F9A72C58500800D73179 /* Base in Resources */,
@@ -317,7 +321,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = doc.com.AudioPlayerProject;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -346,7 +350,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = doc.com.AudioPlayerProject;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
