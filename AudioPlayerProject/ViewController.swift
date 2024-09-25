@@ -15,13 +15,20 @@ class ViewController: UIViewController {
     @IBOutlet weak var audioFileToByteArrayBtn: UIButton!
     @IBOutlet weak var byteArrayToPlayAudioBtn: UIButton!
     @IBOutlet weak var audioNodePlayBtn: UIButton!
-    @IBOutlet weak var playWithBufferBtn: UIButton!
+    @IBOutlet weak var enqueueAudioBtn: UIButton!
+    @IBOutlet weak var dequeueAudioBtn: UIButton!
+    @IBOutlet weak var queuePlayBtn: UIButton!
     
     private let queue = DispatchQueue(label: "SerialQueue", attributes: .concurrent)
+    private let bufferEnqueue = DispatchQueue(label: "BufferEnqueue", attributes: .concurrent)
+    private let bufferDequeue = DispatchQueue(label: "BufferDequeue", attributes: .concurrent)
+    let dispatchQueueGroup = DispatchGroup()
     
     lazy var audioEngine = AVAudioEngine()
     var playerNode = AVAudioPlayerNode()
     var audioByteArrays: [[UInt8]] = []
+    
+    var bufferQueue = Queue<[UInt8]>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,10 +65,20 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func clickedBufferPlayButton(_ sender: Any) {
+    @IBAction func clickedEnqueueAudio(_ sender: Any) {
         queue.async {
-            self.allPlayWithPCMBuffer()
+            self.enqueueAudio()
         }
+    }
+    
+    @IBAction func clickedDequeueAudio(_ sender: Any) {
+        queue.async {
+            self.dequeueAudio()
+        }
+    }
+    
+    @IBAction func clickedQueuePlayButton(_ sender: Any) {
+
     }
     
     func sampleAudioJustPlay() {
@@ -74,7 +91,7 @@ class ViewController: UIViewController {
         self.audioEngine = AVAudioEngine()
         self.playerNode = AVAudioPlayerNode()
         
-        if let audioURL = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16", withExtension: "wav") {
+        if let audioURL = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16_2sec", withExtension: "wav") {
             do {
                 let file: AVAudioFile = try AVAudioFile(forReading: audioURL)
                 print("audio play file: \(file)")
@@ -108,7 +125,7 @@ class ViewController: UIViewController {
     }
 
     func sampleAudioFileToByteWithFormat() {
-        if let url = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16", withExtension: "wav") {
+        if let url = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16_2sec", withExtension: "wav") {
             let sampleRate = 48000.0
             let channels: AVAudioChannelCount = 1
             let bitsPerChannel: UInt32 = 32
@@ -379,7 +396,7 @@ class ViewController: UIViewController {
     func readAudioFileToByteDump() {
         print("start make byte array")
         //let bus: AVAudioNodeBus = 0
-        guard let fileURL = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16", withExtension: "wav") else {
+        guard let fileURL = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16_2sec", withExtension: "wav") else {
             print("Failed to load audioFile.")
             return
         }
@@ -467,7 +484,7 @@ class ViewController: UIViewController {
     }
     
     func allPlayWithPCMBuffer() {
-        guard let url = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16", withExtension: "wav") else {
+        guard let url = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16_2sec", withExtension: "wav") else {
             return
         }
         
@@ -485,19 +502,6 @@ class ViewController: UIViewController {
                 return
             }
             print("Create format: \(String(describing: format))")
-            
-            // AudioEngine, Player Node setting---------------
-            self.audioEngine = AVAudioEngine()
-            self.playerNode = AVAudioPlayerNode()
-            
-            self.audioEngine.attach(self.playerNode)
-            self.audioEngine.connect(self.playerNode, to: self.audioEngine.outputNode, format: format)
-            
-            try self.audioEngine.start()
-            
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            try AVAudioSession.sharedInstance().setActive(true)
-            //------------------------------------------------
             
             print("audioFile Total Length: \(audioFile.length)")
             
@@ -518,7 +522,7 @@ class ViewController: UIViewController {
                     return
                 }
                 
-                var frameLength = Int(buffer.frameLength)
+                let frameLength = Int(buffer.frameLength)
                 print("FrameLength in present buffer: \(frameLength)")
                 
                 let bytePerFrame = Int(bitsPerChannel / 8)
@@ -526,15 +530,7 @@ class ViewController: UIViewController {
                 
                 var byteArray = [UInt8](repeating: 0, count: frameLength * bytePerFrame * Int(channels))
                 
-                // audioBuffer for playing-------------------------
-                let audioBuffer = buffer.audioBufferList.pointee.mBuffers
-                
-                guard let dst = audioBuffer.mData?.bindMemory(to: UInt8.self, capacity: byteArray.count) else {
-                    print("Failed to bind memory to destination buffer")
-                    return
-                }
-                //--------------------------------------------------
-                
+                // make byteArray-----------------------------------
                 for channel in 0 ..< Int(channels) {
                     let channelDataPointer = channelData[channel]
                     let channelDataBuffer = UnsafeBufferPointer(start: channelDataPointer, count: frameLength)
@@ -547,6 +543,25 @@ class ViewController: UIViewController {
                         }
                     }
                 }
+                // AudioEngine, Player Node setting---------------
+                self.audioEngine = AVAudioEngine()
+                self.playerNode = AVAudioPlayerNode()
+                
+                self.audioEngine.attach(self.playerNode)
+                self.audioEngine.connect(self.playerNode, to: self.audioEngine.outputNode, format: format)
+                
+                try self.audioEngine.start()
+                
+                try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+                try AVAudioSession.sharedInstance().setActive(true)
+
+                // audioBuffer for playing-------------------------
+                let audioBuffer = buffer.audioBufferList.pointee.mBuffers
+                
+                guard let dst = audioBuffer.mData?.bindMemory(to: UInt8.self, capacity: byteArray.count) else {
+                    print("Failed to bind memory to destination buffer")
+                    return
+                }
                 
                 byteArray.withUnsafeBufferPointer {
                     if let baseAddress = $0.baseAddress{
@@ -557,6 +572,7 @@ class ViewController: UIViewController {
                     }
                 }
                 self.playerNode.scheduleBuffer(buffer, completionHandler: nil)
+                //self.playAudioNodePlay()
 
             }
             self.playAudioNodePlay()
@@ -564,6 +580,183 @@ class ViewController: UIViewController {
         } catch {
             print("Error reading audio file: \(error.localizedDescription)")
             return
+        }
+    }
+    
+    // MARK: multi thread and Queue
+    func enqueueAudio() {
+        guard let url = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16_10sec", withExtension: "wav") else {
+            return
+        }
+        
+        let sampleRate = 48000.0 // 1초에 몇 byte 재생하는가
+        let channels: AVAudioChannelCount = 1
+        let bitsPerChannel: UInt32 = 32 // (4 byte)
+        let bufferSize: AVAudioFrameCount = 2400
+        // 초당 데이터양 = sampleRate * channels * bits
+        // 48000 * 1 * 2byte (16/8) = 96000byte/1sec
+        // bufferSize = 초당 데이터양 / Frame당 데이터(bitsPerChannel/8)
+        // frame Size = SampleRate * Channels
+        
+        do {
+            let audioFile = try AVAudioFile(forReading: url)
+            print("audioFile Length: \(audioFile.length)")
+            
+            guard let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(sampleRate), channels: AVAudioChannelCount(channels), interleaved: false) else {
+                print("Failed to create AVAudioformat")
+                return
+            }
+            guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: bufferSize) else {
+                print("Failed to create AVAudioPCMBuffer")
+                return
+            }
+            
+            //var bufferQueue = Queue<[UInt8]>()
+            let queue = self.bufferQueue
+            
+            while audioFile.framePosition < audioFile.length {
+
+                try audioFile.read(into: buffer, frameCount: bufferSize)
+                guard let channelData = buffer.floatChannelData else {
+                    print("Failed to access channel data")
+                    return
+                }
+                let frameLength = Int(buffer.frameLength)
+                let bytePerFrame = Int(bitsPerChannel / 8)
+                var byteArray = [UInt8](repeating: 0, count: frameLength * bytePerFrame * Int(channels))
+                // byteArray.count : 배열의 byte크기
+                
+                for channel in 0 ..< Int(channels) {
+                    let channelDataPointer = channelData[channel]
+                    let channelDataBuffer = UnsafeBufferPointer(start: channelDataPointer, count: frameLength)
+                    for frame in 0 ..< frameLength {
+                        let sample = channelDataBuffer[frame]
+                        let sampleBytes = withUnsafeBytes(of: sample.bitPattern.littleEndian) { Array($0) }
+                        for byteIndex in 0 ..< bytePerFrame {
+                            byteArray[frame * bytePerFrame * Int(channels) + channel * bytePerFrame + byteIndex] = sampleBytes[byteIndex]
+                        }
+                    }
+                }
+                print("byteArray.capacity: \(byteArray.capacity)")
+                print("byteArray Size: \(byteArray.count) byte")
+                bufferEnqueue.asyncAndWait {
+                    queue.enqueue(byteArray)
+                    print("queue.count: \(queue.count)")
+                }
+                guard queue.count % 10 != 0 else {
+                    sleep(1)
+                    print("-------------- enqueue sleep 1sec --------------")
+                    continue
+                }
+                //print("ByteArray appended to byteBuffer: \(byteArray)")
+            }
+        } catch {
+            print("Error reading audio file: \(error.localizedDescription)")
+            return
+        }
+    }
+    
+    func checkBufferQueue() -> Bool {
+        let queue = self.bufferQueue
+        print("queue.count: \(queue.count)")
+        guard !queue.isEmpty else {
+            print("bufferQueue is empty...")
+            return false
+        }
+        return true
+    }
+    
+    func dequeueAudio() {
+        let queue = self.bufferQueue
+        let sampleRate = 48000.0 // 1초에 몇 byte 재생하는가
+        let channels: AVAudioChannelCount = 1
+        
+        guard let audioFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: sampleRate, channels: channels, interleaved: false) else {
+            print("Failed to create AVAudioformat")
+            return
+        }
+        
+        self.audioEngine = AVAudioEngine()
+        self.playerNode = AVAudioPlayerNode()
+        
+        self.audioEngine.attach(self.playerNode)
+        self.audioEngine.connect(self.playerNode, to: self.audioEngine.outputNode, format: audioFormat)
+        
+        while self.checkBufferQueue() {
+            print("dequeue: \(queue.count)")
+            if queue.count >= 10 {
+                for _ in 0...9 {
+                    bufferDequeue.asyncAndWait {
+                        self.playPCMBuffer(format: audioFormat)
+                    }
+                }
+            } else if queue.count < 10 {
+                for _ in 0...(queue.count - 1) {
+                    bufferDequeue.asyncAndWait {
+                        self.playPCMBuffer(format: audioFormat)
+                    }
+                }
+            }
+        }
+        
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 11.0) {
+            self.playerNode.stop()
+            self.playerNode.reset()
+            print("Player node stop and reset")
+            
+            self.audioEngine.stop()
+            self.audioEngine.reset()
+            print("Audio Engine stop and reset")
+        }
+    }
+    
+    func playPCMBuffer(format: AVAudioFormat) {
+        let queue = self.bufferQueue
+        
+        guard let byteArray = queue.dequeue() else {
+            return
+        }
+        //print("dequeue byteArray: \(byteArray)")
+        //print("dequeue byteArray")
+        
+        do {
+            try self.audioEngine.start()
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+            
+            guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(byteArray.count) / (format.streamDescription.pointee.mBytesPerFrame)) else {
+                print("Failed to create AVAudioPCMBuffer")
+                return
+            }
+            //print("buffer format: \(buffer.format)")
+            buffer.frameLength = buffer.frameCapacity
+            let audioBuffer = buffer.audioBufferList.pointee.mBuffers
+            
+            guard let dst = audioBuffer.mData?.bindMemory(to: UInt8.self, capacity: byteArray.count) else {
+                print("Failed to bind memory to destination buffer")
+                return
+            }
+            //print("byteArray.count: \(byteArray.count)")
+            
+            byteArray.withUnsafeBufferPointer {
+                if let baseAddress = $0.baseAddress {
+                    dst.update(from: baseAddress, count: byteArray.count)
+                    print("Data successfully copied to buffer.")
+                } else {
+                    print("Failed to get base address of byte array")
+                }
+            }
+            self.playerNode.scheduleBuffer(buffer, completionHandler: nil)
+            
+            if self.audioEngine.isRunning {
+                self.playerNode.play()
+            } else {
+                print("Audio Engine is not running")
+            }
+            
+        } catch {
+            print("Error starting audio engine: \(error.localizedDescription)")
         }
     }
 }

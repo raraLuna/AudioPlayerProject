@@ -18,7 +18,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="g4e-2d-OWQ">
-                                <rect key="frame" x="144.66666666666666" y="159" width="104" height="35"/>
+                                <rect key="frame" x="144.66666666666666" y="109" width="104" height="35"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Play Audio"/>
                                 <connections>
@@ -26,7 +26,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RN8-qu-OEK">
-                                <rect key="frame" x="67.666666666666686" y="254" width="258" height="35"/>
+                                <rect key="frame" x="67.666666666666686" y="204" width="258" height="35"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Audio File -&gt; Byte Array (PCM)"/>
                                 <connections>
@@ -34,7 +34,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NH8-vB-xyA">
-                                <rect key="frame" x="59.666666666666657" y="319" width="274" height="35"/>
+                                <rect key="frame" x="59.666666666666657" y="269" width="274" height="35"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Byte Array -&gt; AudioPlayer (PCM)"/>
                                 <connections>
@@ -42,7 +42,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OaX-cc-cyy">
-                                <rect key="frame" x="118" y="384" width="157" height="35"/>
+                                <rect key="frame" x="118" y="334" width="157" height="35"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="AudioNode.play()"/>
                                 <connections>
@@ -50,7 +50,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="G3K-sh-FAH">
-                                <rect key="frame" x="139" y="479" width="115.33333333333331" height="35"/>
+                                <rect key="frame" x="139" y="429" width="115.33333333333331" height="35"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Make Dump"/>
                                 <connections>
@@ -58,11 +58,27 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rqY-fy-1iW">
-                                <rect key="frame" x="105" y="574" width="183" height="35"/>
+                                <rect key="frame" x="98.666666666666686" y="524" width="196" height="35"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="Buffer All Play (PCM)"/>
+                                <buttonConfiguration key="configuration" style="plain" title=" Audio enqueue (PCM)"/>
                                 <connections>
-                                    <action selector="clickedBufferPlayButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="zis-JK-LdS"/>
+                                    <action selector="clickedEnqueueAudio:" destination="BYZ-38-t0r" eventType="touchUpInside" id="zis-JK-LdS"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IO6-HZ-sjL">
+                                <rect key="frame" x="100.66666666666669" y="589" width="192" height="35"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Audio dequeue (PCM)"/>
+                                <connections>
+                                    <action selector="clickedDequeueAudio:" destination="BYZ-38-t0r" eventType="touchUpInside" id="r11-3D-yOp"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NuF-Il-boY">
+                                <rect key="frame" x="117" y="654" width="159" height="35"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Audio Queue Play"/>
+                                <connections>
+                                    <action selector="clickedQueuePlayButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="62G-bx-Dru"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -72,13 +88,17 @@
                             <constraint firstItem="NH8-vB-xyA" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="4H0-b1-0Ml"/>
                             <constraint firstItem="RN8-qu-OEK" firstAttribute="top" secondItem="g4e-2d-OWQ" secondAttribute="bottom" constant="60" id="6KB-jr-yle"/>
                             <constraint firstItem="G3K-sh-FAH" firstAttribute="top" secondItem="OaX-cc-cyy" secondAttribute="bottom" constant="60" id="Ayn-SX-HLk"/>
+                            <constraint firstItem="IO6-HZ-sjL" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="BOM-Xz-Viz"/>
                             <constraint firstItem="rqY-fy-1iW" firstAttribute="top" secondItem="G3K-sh-FAH" secondAttribute="bottom" constant="60" id="GUG-9w-UpU"/>
                             <constraint firstItem="G3K-sh-FAH" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="MZq-AO-T5M"/>
                             <constraint firstItem="OaX-cc-cyy" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="P5Y-Po-ksA"/>
                             <constraint firstItem="OaX-cc-cyy" firstAttribute="top" secondItem="NH8-vB-xyA" secondAttribute="bottom" constant="30" id="eWI-B8-Sfd"/>
-                            <constraint firstItem="g4e-2d-OWQ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="100" id="ebe-bH-ITY"/>
+                            <constraint firstItem="g4e-2d-OWQ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="50" id="ebe-bH-ITY"/>
                             <constraint firstItem="rqY-fy-1iW" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="jw6-sD-Yjn"/>
                             <constraint firstItem="RN8-qu-OEK" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="miQ-nk-zXW"/>
+                            <constraint firstItem="NuF-Il-boY" firstAttribute="top" secondItem="IO6-HZ-sjL" secondAttribute="bottom" constant="30" id="nrH-m0-w0F"/>
+                            <constraint firstItem="IO6-HZ-sjL" firstAttribute="top" secondItem="rqY-fy-1iW" secondAttribute="bottom" constant="30" id="oSD-fA-OTw"/>
+                            <constraint firstItem="NuF-Il-boY" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="r4y-Mq-qBi"/>
                             <constraint firstItem="NH8-vB-xyA" firstAttribute="top" secondItem="RN8-qu-OEK" secondAttribute="bottom" constant="30" id="v7b-k3-jhV"/>
                             <constraint firstItem="g4e-2d-OWQ" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="xRV-PK-p4P"/>
                         </constraints>
@@ -87,9 +107,11 @@
                         <outlet property="audioFileToByteArrayBtn" destination="RN8-qu-OEK" id="wAI-ht-iFn"/>
                         <outlet property="audioNodePlayBtn" destination="OaX-cc-cyy" id="iSa-3j-hb4"/>
                         <outlet property="byteArrayToPlayAudioBtn" destination="NH8-vB-xyA" id="ufA-bb-wm4"/>
+                        <outlet property="dequeueAudioBtn" destination="IO6-HZ-sjL" id="SVo-tQ-lB9"/>
+                        <outlet property="enqueueAudioBtn" destination="rqY-fy-1iW" id="bQt-lv-iPa"/>
                         <outlet property="justPlayAudioBtn" destination="g4e-2d-OWQ" id="Ayu-Tt-OQt"/>
                         <outlet property="makeByteArrayBtn" destination="G3K-sh-FAH" id="glu-kJ-HRI"/>
-                        <outlet property="playWithBufferBtn" destination="rqY-fy-1iW" id="bQt-lv-iPa"/>
+                        <outlet property="queuePlayBtn" destination="NuF-Il-boY" id="Qoi-wh-HrT"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
