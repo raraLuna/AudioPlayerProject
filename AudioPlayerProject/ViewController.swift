@@ -29,7 +29,7 @@ class ViewController: UIViewController {
     
     var bufferQueue = Queue<[UInt8]>()
     var enqueueTaskEnd: Bool = false
-
+    var audioPlayTime: Int = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -609,6 +609,8 @@ class ViewController: UIViewController {
         do {
             let audioFile = try AVAudioFile(forReading: url)
             print("audioFile Length: \(audioFile.length)")
+            self.audioPlayTime = Int(audioFile.length) / Int(sampleRate)
+            print("self.audioPlayTime: \(self.audioPlayTime)")
             
             guard let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(sampleRate), channels: AVAudioChannelCount(channels), interleaved: false) else {
                 print("Failed to create AVAudioformat")
@@ -709,7 +711,8 @@ class ViewController: UIViewController {
         }
         print("enqueueTaskEnd: \(self.enqueueTaskEnd)")
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 11.0) {
+        var afterTime = DispatchTimeInterval.seconds(self.audioPlayTime + 1)
+        DispatchQueue.main.asyncAfter(deadline: .now() + afterTime) {
             self.playerNode.stop()
             self.playerNode.reset()
             print("Player node stop and reset")
