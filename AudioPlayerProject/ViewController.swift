@@ -22,17 +22,19 @@ class ViewController: UIViewController {
     private let queue = DispatchQueue(label: "SerialQueue", attributes: .concurrent)
     private let bufferEnqueue = DispatchQueue(label: "BufferEnqueue", attributes: .concurrent)
     private let bufferDequeue = DispatchQueue(label: "BufferDequeue", attributes: .concurrent)
-    let dispatchQueueGroup = DispatchGroup()
     
     lazy var audioEngine = AVAudioEngine()
     var playerNode = AVAudioPlayerNode()
     var audioByteArrays: [[UInt8]] = []
     
     var bufferQueue = Queue<[UInt8]>()
+    var enqueueTaskEnd: Bool = false
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        self.enqueueAudioBtn.isHidden = true
+        self.dequeueAudioBtn.isHidden = true
     }
 
     @IBAction func clickedPlayAudioButton(_ sender: Any) {
@@ -78,9 +80,15 @@ class ViewController: UIViewController {
     }
     
     @IBAction func clickedQueuePlayButton(_ sender: Any) {
-
+        DispatchQueue.global().async {
+            self.dequeueAudio()
+        }
+        
+        DispatchQueue.global().async {
+            self.enqueueAudio()
+        }
     }
-    
+
     func sampleAudioJustPlay() {
         //let sampleRate = 48000.0
         //let channels: AVAudioChannelCount = 1
@@ -114,7 +122,6 @@ class ViewController: UIViewController {
                 try self.audioEngine.start()
                 
                 self.playerNode.scheduleFile(file, at: nil, completionHandler: nil)
-
                 
                 self.playAudioNodePlay()
                 
@@ -585,6 +592,7 @@ class ViewController: UIViewController {
     
     // MARK: multi thread and Queue
     func enqueueAudio() {
+        self.enqueueTaskEnd = false
         guard let url = Bundle.main.url(forResource: "sampleAudio_1ch_48000_Int16_10sec", withExtension: "wav") else {
             return
         }
@@ -637,19 +645,15 @@ class ViewController: UIViewController {
                         }
                     }
                 }
-                print("byteArray.capacity: \(byteArray.capacity)")
-                print("byteArray Size: \(byteArray.count) byte")
+                //print("byteArray.capacity: \(byteArray.capacity)")
+                //print("byteArray Size: \(byteArray.count) byte")
                 bufferEnqueue.asyncAndWait {
                     queue.enqueue(byteArray)
-                    print("queue.count: \(queue.count)")
+                    print("enqueue queue.count: \(queue.count)")
                 }
-                guard queue.count % 10 != 0 else {
-                    sleep(1)
-                    print("-------------- enqueue sleep 1sec --------------")
-                    continue
-                }
-                //print("ByteArray appended to byteBuffer: \(byteArray)")
             }
+            sleep(1)
+            self.enqueueTaskEnd = true
         } catch {
             print("Error reading audio file: \(error.localizedDescription)")
             return
@@ -658,7 +662,7 @@ class ViewController: UIViewController {
     
     func checkBufferQueue() -> Bool {
         let queue = self.bufferQueue
-        print("queue.count: \(queue.count)")
+        //print("checkBufferQueue isEmpty: \(queue.isEmpty)")
         guard !queue.isEmpty else {
             print("bufferQueue is empty...")
             return false
@@ -682,23 +686,28 @@ class ViewController: UIViewController {
         self.audioEngine.attach(self.playerNode)
         self.audioEngine.connect(self.playerNode, to: self.audioEngine.outputNode, format: audioFormat)
         
-        while self.checkBufferQueue() {
-            print("dequeue: \(queue.count)")
-            if queue.count >= 10 {
-                for _ in 0...9 {
-                    bufferDequeue.asyncAndWait {
-                        self.playPCMBuffer(format: audioFormat)
+        print("enqueueTaskEnd: \(self.enqueueTaskEnd)")
+        
+        while self.enqueueTaskEnd == false {
+            while self.checkBufferQueue() {
+                print("dequeue task: \(queue.count)")
+                if queue.count >= 10 {
+                    for _ in 0...9 {
+                        bufferDequeue.asyncAndWait {
+                            self.playPCMBuffer(format: audioFormat)
+                        }
                     }
-                }
-            } else if queue.count < 10 {
-                for _ in 0...(queue.count - 1) {
-                    bufferDequeue.asyncAndWait {
-                        self.playPCMBuffer(format: audioFormat)
+                } else if queue.count < 10 {
+                    for _ in 0...(queue.count - 1) {
+                        bufferDequeue.asyncAndWait {
+                            self.playPCMBuffer(format: audioFormat)
+                        }
                     }
                 }
             }
+            sleep(1)
         }
-        
+        print("enqueueTaskEnd: \(self.enqueueTaskEnd)")
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 11.0) {
             self.playerNode.stop()
@@ -742,7 +751,7 @@ class ViewController: UIViewController {
             byteArray.withUnsafeBufferPointer {
                 if let baseAddress = $0.baseAddress {
                     dst.update(from: baseAddress, count: byteArray.count)
-                    print("Data successfully copied to buffer.")
+                    //print("Data successfully copied to buffer.")
                 } else {
                     print("Failed to get base address of byte array")
                 }
